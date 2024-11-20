@@ -7,4 +7,5 @@ PORT="8080"
 
 # Start the PHP built-in server
 echo "Starting PHP server on $HOST:$PORT"
+
 php -S "$HOST:$PORT"
