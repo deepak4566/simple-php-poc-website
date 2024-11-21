@@ -1,9 +1,7 @@
 name: Deploy to Google Cloud Instance
 
 on:
-  push:
-    branches:
-      - main  # Trigger on commits to the main branch
+  push: # Trigger on commits to the all branch
 
 jobs:
   deploy:
@@ -22,11 +20,11 @@ jobs:
     - name: Deploy to Compute Engine Instance
       run: |
         # Define variables
-        INSTANCE_NAME="my-instance"
-        ZONE="us-central1-a"  # Replace with your instance's zone
-        SSH_USER="username"  # Replace with the user for the instance
+        INSTANCE_NAME="demo-poc"
+        ZONE="us-central1-b"  # Replace with your instance's zone
+        SSH_USER="your-email"  # Replace with the user for the instance
         SSH_KEY="${{ secrets.GCP_SSH_PRIVATE_KEY }}"  # Add private SSH key to secrets
-        DEPLOY_SCRIPT="deploy.sh"  # Script to run on the instance
+        DEPLOY_SCRIPT="Script.sh"  # Script to run on the instance
 
         # Write SSH key to a file
         echo "$SSH_KEY" > private_key
@@ -43,4 +41,5 @@ jobs:
         gcloud compute ssh "$SSH_USER@$INSTANCE_NAME" \
           --zone "$ZONE" \
           --ssh-key-file=private_key \
-          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./deploy.sh"
+          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./Script.sh"
+
