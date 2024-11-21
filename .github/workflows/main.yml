@@ -26,18 +26,7 @@ jobs:
         # Start ssh-agent manually and add the SSH key
         eval $(ssh-agent -s)
         
-        # Add SSH key to agent without using stdin, avoiding libcrypto error
-        mkdir -p ~/.ssh
-        echo "$GCP_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-add ~/.ssh/id_rsa
-
-        # Prepare SSH configuration
-        touch ~/.ssh/config
-        touch ~/.ssh/known_hosts
-        chmod -R 400 ~/.ssh
-        # Add the instance to known hosts (replace <ip> with actual IP)
-        ssh-keyscan 34.135.4.248 >> ~/.ssh/known_hosts
+        
 
     - name: Deploy to Compute Engine Instance
       run: |
@@ -48,19 +37,12 @@ jobs:
         SSH_KEY="${{ secrets.GCP_SSH_PRIVATE_KEY }}"  # Add private SSH key to secrets
         DEPLOY_SCRIPT="Script.sh"  # Script to run on the instance
 
-        # Write SSH key to a file
-        echo "$GCP_SSH_PRIVATE_KEY" > private_key
-        chmod 600 private_key
+        echo "$GCP_SSH_PRIVATE_KEY"
 
-        # Generate public key (if missing)
-        ssh-keygen -y -f private_key > private_key.pub
 
-        # Ensure public key is added to the instance metadata or project metadata
-        ssh -i private_key "$SSH_USER@34.135.4.248"
+        sudo apt-get install apt-transport-https ca-certificates gnupg curl
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        sudo apt-get update && sudo apt-get install google-cloud-cli
 
-        # Run the deployment script on the instance
-        echo "Running the deployment script on the instance..."
-        gcloud compute ssh "$SSH_USER@$INSTANCE_NAME" \
-          --zone "$ZONE" \
-          --ssh-key-file=private_key \
-          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./$DEPLOY_SCRIPT" --verbosity=debug
+        
