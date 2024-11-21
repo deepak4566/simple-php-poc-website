@@ -2,7 +2,6 @@ name: Deploy to Google Cloud Instance
 
 on:
   push:
-    
 
 jobs:
   deploy:
@@ -11,8 +10,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-
 
     - name: Deploy to Compute Engine Instance
       run: |
@@ -27,10 +24,16 @@ jobs:
         echo "$SSH_KEY" > private_key
         chmod 600 private_key
 
-        # Generate public key (if missing)
+        # Generate public key
         ssh-keygen -y -f private_key > private_key.pub
 
-        # Ensure public key is added to the instance metadata or project metadata
-        ssh -i private_key "$SSH_USER@34.135.4.248"
-
         
+
+        # Add the instance to known_hosts to prevent host key verification issues
+        ssh-keyscan -H 34.135.4.248 >> ~/.ssh/known_hosts
+
+        # Connect to the instance and execute the script
+        scp -i private_key $DEPLOY_SCRIPT "$SSH_USER@34.135.4.248:~/"
+        ssh -i private_key "$SSH_USER@34.135.4.248" "bash ~/Script.sh"
+
+    
