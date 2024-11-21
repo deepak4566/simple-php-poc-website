@@ -1,45 +1,43 @@
-name: Deploy to Google Cloud
+name: Deploy to Google Cloud Instance
 
 on:
   push:
-    
+    branches:
+      - main  # Trigger on commits to the main branch
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+   
+    - name: Deploy to Compute Engine Instance
+      run: |
+        # Define variables
+        INSTANCE_NAME="demo-poc"
+        ZONE="us-central1-b"  # Replace with your instance's zone
+        SSH_USER="your-email"  # Replace with the user for the instance
+        SSH_KEY="${{ secrets.GCP_SSH_PRIVATE_KEY }}"  # Add private SSH key to secrets
+        DEPLOY_SCRIPT="Script.sh"  # Script to run on the instance
 
-    
+        # Write SSH key to a file
+        echo "$GCP_SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
         
-    - name: Authenticate with Google Cloud
-      run: |
-        # Authenticate the Google Cloud SDK with the service account
-        gcloud auth activate-service-account --key-file="${{ secrets.GCP_CREDENTIALS_JSON }}"
-        
-    - name: Transfer files to Google Cloud instance
-      run: |
-        echo "Copying files to the instance..."
-        gcloud compute scp --zone "$ZONE" \
-          --ssh-key-file=private_key \
-          --recurse . "$SSH_USER@$INSTANCE_NAME:/home/$SSH_USER/app" --verbosity=debug
 
-    - name: Run deployment script on the instance
-      run: |
+        # Generate public key (if missing)
+        ssh-keygen -y -f private_key > private_key.pub
+
+        # Ensure public key is added to the instance metadata or project metadata
+        ssh -i private_key your-email@34.135.4.248
+
+        
+        # Run the deployment script on the instance
         echo "Running the deployment script on the instance..."
         gcloud compute ssh "$SSH_USER@$INSTANCE_NAME" \
           --zone "$ZONE" \
           --ssh-key-file=private_key \
-          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./$DEPLOY_SCRIPT" --verbosity=debug
-
-    - name: Clean up private key file
-      run: |
-        # Clean up the private key file after the deployment
-        rm private_key private_key.pub
+          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./Script.sh" --verbosity=debug
