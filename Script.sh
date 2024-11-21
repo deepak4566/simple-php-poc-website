@@ -7,6 +7,10 @@
 
 
 # Start the PHP built-in server
-echo "Starting PHP server on $HOST:$PORT"
+echo "Iam starting the game now"
+
+sudo cd /var/www/html/poc-php.cottonseeds.org
+
+sudo git pull
 
 # php -S "$HOST:$PORT"
