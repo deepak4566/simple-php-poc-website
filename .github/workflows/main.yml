@@ -23,11 +23,15 @@ jobs:
         # Write SSH key to a file
         echo "$SSH_KEY" > private_key
         chmod 600 private_key
+        
 
         # Generate public key
         ssh-keygen -y -f private_key > private_key.pub
 
-        
+        mkdir -p ~/.ssh
+
+        # Add the instance to known_hosts to prevent host key verification issues
+        ssh-keyscan -H 34.135.4.248 >> ~/.ssh/known_hosts
 
         # Add the instance to known_hosts to prevent host key verification issues
         ssh-keyscan -H 34.135.4.248 >> ~/.ssh/known_hosts
