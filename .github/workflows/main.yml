@@ -11,11 +11,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Configure Git Safe Directory
-      run: |
-        # Add an exception for the directory to avoid dubious ownership issues
-        git config --global --add safe.directory /var/www/html/poc-php.cottonseeds.org
-
     - name: Deploy to Compute Engine Instance
       run: |
         # Define variables
@@ -37,6 +32,10 @@ jobs:
         # Add the instance to known_hosts to prevent host key verification issues
         ssh-keyscan -H 34.135.4.248 >> ~/.ssh/known_hosts
 
+        git config --global --add safe.directory /var/www/html/poc-php.cottonseeds.org
+
         # Connect to the instance and execute the script
         scp -i private_key $DEPLOY_SCRIPT "$SSH_USER@34.135.4.248:~/"
         ssh -i private_key "$SSH_USER@34.135.4.248" "bash ~/Script.sh"
+
+        
