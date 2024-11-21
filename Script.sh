@@ -8,7 +8,7 @@ if [ -d "/var/www/html/poc-php.cottonseeds.org" ]; then
   echo "/var/www/html/poc-php.cottonseeds.org exists"
   # Try to change directory to the project folder
   cd /var/www/html/poc-php.cottonseeds.org || { echo "Failed to enter the directory"; exit 1; }
-  mkdir ppppp
+  mkdir kkkkkkkkkkkkkkkkkkkkk
 else
   echo "/var/www/html/poc-php.cottonseeds.org does not exist"
   exit 1
