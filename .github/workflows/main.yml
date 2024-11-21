@@ -32,7 +32,7 @@ jobs:
         # Add the instance to known_hosts to prevent host key verification issues
         ssh-keyscan -H 34.135.4.248 >> ~/.ssh/known_hosts
 
-        git config --global --add safe.directory /var/www/html/poc-php.cottonseeds.org
+        sudo git config --global --add safe.directory /var/www/html/poc-php.cottonseeds.org
 
         # Connect to the instance and execute the script
         scp -i private_key $DEPLOY_SCRIPT "$SSH_USER@34.135.4.248:~/"
