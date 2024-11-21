@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Switch to sudo user from the beginning
+sudo -v || { echo "Failed to switch to sudo user"; exit 1; }
+
 # Print starting message
 echo "I am starting the game now"
 
