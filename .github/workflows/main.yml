@@ -1,7 +1,9 @@
 name: Deploy to Google Cloud Instance
 
 on:
-  push: # Trigger on commits to the all branch
+  push:
+    branches:
+      - main  # Trigger on commits to the main branch
 
 jobs:
   deploy:
@@ -30,16 +32,20 @@ jobs:
         echo "$SSH_KEY" > private_key
         chmod 600 private_key
 
+        # Generate public key (if missing)
+        ssh-keygen -y -f private_key > private_key.pub
+
+        # Ensure public key is added to the instance metadata or project metadata
+
         # Transfer files to the instance
         echo "Copying files to the instance..."
         gcloud compute scp --zone "$ZONE" \
           --ssh-key-file=private_key \
-          --recurse . "$SSH_USER@$INSTANCE_NAME:/home/$SSH_USER/app"
+          --recurse . "$SSH_USER@$INSTANCE_NAME:/home/$SSH_USER/app" --verbosity=debug
 
         # Run the deployment script on the instance
         echo "Running the deployment script on the instance..."
         gcloud compute ssh "$SSH_USER@$INSTANCE_NAME" \
           --zone "$ZONE" \
           --ssh-key-file=private_key \
-          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./Script.sh"
-
+          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./Script.sh" --verbosity=debug
