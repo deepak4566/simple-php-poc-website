@@ -1,7 +1,7 @@
 name: Deploy to Google Cloud Instance
 
 on:
-  push:
+  push:  # Trigger on commits to the  branches
     
 
 jobs:
@@ -34,6 +34,9 @@ jobs:
         # Generate public key (if missing)
         ssh-keygen -y -f private_key > private_key.pub
 
+        # Authenticate the Google Cloud SDK with the service account
+        gcloud auth activate-service-account --key-file="${{ secrets.GCLOUD_SERVICE_KEY }}"
+
         # Ensure public key is added to the instance metadata or project metadata
 
         # Transfer files to the instance
@@ -47,4 +50,4 @@ jobs:
         gcloud compute ssh "$SSH_USER@$INSTANCE_NAME" \
           --zone "$ZONE" \
           --ssh-key-file=private_key \
-          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./Script.sh" --verbosity=debug
+          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./$DEPLOY_SCRIPT" --verbosity=debug
