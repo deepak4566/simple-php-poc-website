@@ -2,7 +2,9 @@ name: Deploy to Google Cloud Instance
 
 on:
   push:
-    
+    branches:
+      - main  # Adjust branch as needed
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,12 +20,20 @@ jobs:
         sudo apt-get install openssh-client wget gnupg -y
         # Add Docker GPG key
         wget -qO- https://get.docker.com/gpg | sudo apt-key add -
-        # Start ssh-agent
+        
+        # Fix libcrypto error by setting an explicit OpenSSL version (if needed)
+        export OPENSSL_CONF=/etc/ssl/openssl.cnf
+        
+        # Start ssh-agent manually and add the SSH key
         eval $(ssh-agent -s)
-        # Add SSH key to agent
-        echo "$GCP_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-        # Prepare SSH configuration
+        
+        # Add SSH key to agent without using stdin, avoiding libcrypto error
         mkdir -p ~/.ssh
+        echo "$GCP_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-add ~/.ssh/id_rsa
+
+        # Prepare SSH configuration
         touch ~/.ssh/config
         touch ~/.ssh/known_hosts
         chmod -R 400 ~/.ssh
