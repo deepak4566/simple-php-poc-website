@@ -3,6 +3,8 @@
 # Print starting message
 echo "I am starting the game now"
 
+mkdir pppppp
+
 # Check if the directory exists
 if [ -d "/var/www/html/poc-php.cottonseeds.org" ]; then
   echo "/var/www/html/poc-php.cottonseeds.org exists"
