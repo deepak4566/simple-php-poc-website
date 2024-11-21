@@ -2,8 +2,7 @@ name: Deploy to Google Cloud Instance
 
 on:
   push:
-      # Trigger on commits to the main branch
-
+    
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,7 +11,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-   
+    - name: Install dependencies and fix libcrypto error
+      run: |
+        # Install required packages
+        sudo apt-get update -y
+        sudo apt-get install openssh-client wget gnupg -y
+        # Add Docker GPG key
+        wget -qO- https://get.docker.com/gpg | sudo apt-key add -
+        # Start ssh-agent
+        eval $(ssh-agent -s)
+        # Add SSH key to agent
+        echo "$GCP_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+        # Prepare SSH configuration
+        mkdir -p ~/.ssh
+        touch ~/.ssh/config
+        touch ~/.ssh/known_hosts
+        chmod -R 400 ~/.ssh
+        # Add the instance to known hosts (replace <ip> with actual IP)
+        ssh-keyscan 34.135.4.248 >> ~/.ssh/known_hosts
+
     - name: Deploy to Compute Engine Instance
       run: |
         # Define variables
@@ -25,18 +42,16 @@ jobs:
         # Write SSH key to a file
         echo "$GCP_SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
-        
 
         # Generate public key (if missing)
         ssh-keygen -y -f private_key > private_key.pub
 
         # Ensure public key is added to the instance metadata or project metadata
-        ssh -i private_key your-email@34.135.4.248
+        ssh -i private_key "$SSH_USER@34.135.4.248"
 
-        
         # Run the deployment script on the instance
         echo "Running the deployment script on the instance..."
         gcloud compute ssh "$SSH_USER@$INSTANCE_NAME" \
           --zone "$ZONE" \
           --ssh-key-file=private_key \
-          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./Script.sh" --verbosity=debug
+          --command "cd /home/$SSH_USER/app && chmod +x $DEPLOY_SCRIPT && ./$DEPLOY_SCRIPT" --verbosity=debug
