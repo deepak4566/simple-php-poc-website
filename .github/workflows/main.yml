@@ -30,11 +30,7 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
 
-        # Verify SSH private key is valid (optional)
-        if ! ssh-keygen -f private_key -y &>/dev/null; then
-          echo "Invalid SSH private key"
-          exit 1
-        fi
+        
 
         # Generate public key (if missing)
         ssh-keygen -y -f private_key > private_key.pub
