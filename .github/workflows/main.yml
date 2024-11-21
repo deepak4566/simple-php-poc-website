@@ -2,8 +2,7 @@ name: Deploy to Google Cloud Instance
 
 on:
   push:
-    branches:
-      - main  # Trigger on commits to the main branch
+    
 
 jobs:
   deploy:
