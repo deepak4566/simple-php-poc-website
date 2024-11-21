@@ -12,21 +12,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install dependencies and fix libcrypto error
-      run: |
-        # Install required packages
-        sudo apt-get update -y
-        sudo apt-get install openssh-client wget gnupg -y
-        # Add Docker GPG key
-        wget -qO- https://get.docker.com/gpg | sudo apt-key add -
-        
-        # Fix libcrypto error by setting an explicit OpenSSL version (if needed)
-        export OPENSSL_CONF=/etc/ssl/openssl.cnf
-        
-        # Start ssh-agent manually and add the SSH key
-        eval $(ssh-agent -s)
-        
-        
+
 
     - name: Deploy to Compute Engine Instance
       run: |
@@ -37,12 +23,14 @@ jobs:
         SSH_KEY="${{ secrets.GCP_SSH_PRIVATE_KEY }}"  # Add private SSH key to secrets
         DEPLOY_SCRIPT="Script.sh"  # Script to run on the instance
 
-        echo "$GCP_SSH_PRIVATE_KEY"
+        # Write SSH key to a file
+        echo "$SSH_KEY" > private_key
+        chmod 600 private_key
 
+        # Generate public key (if missing)
+        ssh-keygen -y -f private_key > private_key.pub
 
-        sudo apt-get install apt-transport-https ca-certificates gnupg curl
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-        sudo apt-get update && sudo apt-get install google-cloud-cli
+        # Ensure public key is added to the instance metadata or project metadata
+        ssh -i private_key "$SSH_USER@34.135.4.248"
 
         
