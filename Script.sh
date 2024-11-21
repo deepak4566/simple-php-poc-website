@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sudo apt install php-cli
 # Define host and port
 HOST="0.0.0.0"
 PORT="8080"
