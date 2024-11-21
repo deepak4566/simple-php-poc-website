@@ -8,7 +8,7 @@ require 'includes/config.php';
 require 'includes/functions.php';
 
 echo "hello worlduuuuuuuuu";
-echo "<br>";"
+echo "<br>";
 echo "nenoka erripappa";
 
 init();
